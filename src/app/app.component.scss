@@ -1,0 +1,45 @@
+.usage-limit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #000;
+  padding: 16px;
+
+  span:first-child {
+    padding-right: 32px;
+  }
+}
+
+.form-and-cards {
+  display: flex;
+  flex-flow: row;
+  margin-top: 32px;
+  width: 100%;
+
+  .form,
+  .cards {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+  }
+
+  .form {
+    display: flex;
+    flex-flow: column;
+
+    .form-radio {
+      display: flex;
+      align-items: center;
+      padding: 4px;
+    }
+
+    button[type="submit"] {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 8px;
+    }
+  }
+}
