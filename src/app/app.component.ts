@@ -2,7 +2,6 @@ import { Component, OnDestroy } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import {
   combineLatest,
-  exhaustMap,
   map,
   Observable,
   Subject,
@@ -91,7 +90,7 @@ export class AppComponent implements OnDestroy {
 
     const interval$ = timer(0, TWO_HOURS + ONE_MIN);
     const makeReservation$ = interval$.pipe(
-      exhaustMap(() => this.rest.makeReservation(vehicle))
+      switchMap(() => this.rest.makeReservation(vehicle))
     );
 
     const sub = this.subscribeAfterUpdatingState(makeReservation$);
