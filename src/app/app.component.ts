@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { combineLatest, mergeMap, Subject } from "rxjs";
+import { combineLatest, map, mergeMap, Subject, switchMap, take } from "rxjs";
 import { Reservation, Usage, VehicleMap } from "./interfaces";
 import { RestApiService } from "./services/rest-api.service";
 
@@ -18,6 +18,16 @@ export class AppComponent {
   vehicleMap: VehicleMap | undefined;
   vehicleMapKeys: string[] | undefined;
   vehicleFormControl: FormControl;
+
+  getReservationsAndUsage$ = () =>
+    combineLatest([this.rest.getReservations(), this.rest.checkUsage()]);
+
+  updateUsageAndReservations$ = map(
+    ([reservations, usage]: [reservations: Reservation[], usage: Usage]) => {
+      this.currentReservations$.next(reservations);
+      this.checkUsage$.next(usage);
+    }
+  );
 
   constructor(private rest: RestApiService) {
     this.vehicleFormControl = new FormControl("");
@@ -65,20 +75,10 @@ export class AppComponent {
     this.rest
       .makeReservation(vehicle)
       .pipe(
-        mergeMap(() => {
-          return this.rest.getReservations();
-        }),
-        mergeMap((reservations: Reservation[]) => {
-          this.currentReservations$.next(reservations);
-          return this.rest.checkUsage();
-        })
+        switchMap(this.getReservationsAndUsage$),
+        this.updateUsageAndReservations$
       )
-      .subscribe({
-        next: (usage: Usage) => {
-          this.checkUsage$.next(usage);
-        },
-        error: console.error,
-      });
+      .subscribe();
   }
 
   cancel(event: MouseEvent, reservation: { id: string }): void {
@@ -87,19 +87,9 @@ export class AppComponent {
     this.rest
       .cancelReservation(reservation)
       .pipe(
-        mergeMap(() => {
-          return this.rest.getReservations();
-        }),
-        mergeMap((reservations: Reservation[]) => {
-          this.currentReservations$.next(reservations);
-          return this.rest.checkUsage();
-        })
+        switchMap(this.getReservationsAndUsage$),
+        this.updateUsageAndReservations$
       )
-      .subscribe({
-        next: (usage: Usage) => {
-          this.checkUsage$.next(usage);
-        },
-        error: console.error,
-      });
+      .subscribe();
   }
 }
