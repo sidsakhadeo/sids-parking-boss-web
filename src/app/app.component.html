@@ -407,9 +407,7 @@
         <div *ngFor="let reservation of currentReservations">
           <span>Name: {{ reservation.name }}</span>
           <span>Number plate: {{ reservation.display }}</span>
-          <span>Id: {{ reservation.id }}</span>
-          <span>Start: {{ reservation.grace.min.local }}</span>
-          <span>End: {{ reservation.grace.max.local }}</span>
+          <span>End: {{ getEndsAt(reservation.valid.max.local) }}</span>
           <button type="button" (click)="cancel($event, reservation)">
             Cancel
           </button>

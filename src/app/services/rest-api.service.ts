@@ -72,6 +72,11 @@ export class RestApiService {
                   vehicle: string;
                   name: string;
                   id: string;
+                  key: string;
+                  valid: {
+                    min: { local: string };
+                    max: { local: string };
+                  };
                   grace: { min: { local: string }; max: { local: string } };
                 };
               };
@@ -208,8 +213,6 @@ export class RestApiService {
           }>(checkUsageURL, { params });
         }),
         map((res) => {
-          console.log(res);
-
           const limitItems = res.limits.items;
           const usageItems = res.usage.items;
 
