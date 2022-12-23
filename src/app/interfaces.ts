@@ -27,6 +27,7 @@ export interface Reservation {
   name: string;
   display: string;
   id: string;
+  key: string; // license plate
   grace: {
     min: {
       local: string;
