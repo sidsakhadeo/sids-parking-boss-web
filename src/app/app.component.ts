@@ -113,4 +113,15 @@ export class AppComponent implements OnDestroy {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
+
+  getEndsAt(endsAt: string): string {
+    const endDate = new Date(endsAt);
+    const endAtHours = endDate.getHours() % 12;
+    const amOrPm = endDate.getHours() >= 12 ? "PM" : "AM";
+    const endAtMins = endDate.getMinutes();
+
+    const endAtDate = endDate.getDate();
+    const endAtMonth = endDate.getMonth();
+    return `${endAtHours}:${endAtMins}${amOrPm} on ${endAtMonth}/${endAtDate}`;
+  }
 }

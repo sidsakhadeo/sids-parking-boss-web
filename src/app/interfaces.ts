@@ -36,6 +36,14 @@ export interface Reservation {
       local: string;
     };
   };
+  valid: {
+    min: {
+      local: string;
+    };
+    max: {
+      local: string;
+    };
+  };
 }
 
 export interface Usage {

@@ -73,6 +73,10 @@ export class RestApiService {
                   name: string;
                   id: string;
                   key: string;
+                  valid: {
+                    min: { local: string };
+                    max: { local: string };
+                  };
                   grace: { min: { local: string }; max: { local: string } };
                 };
               };
