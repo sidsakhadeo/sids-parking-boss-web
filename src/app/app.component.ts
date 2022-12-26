@@ -1,41 +1,25 @@
-import { Component, OnDestroy } from "@angular/core";
+import { Component } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import {
-  combineLatest,
-  map,
-  Observable,
-  Subject,
-  Subscription,
-  switchMap,
-  takeUntil,
-  tap,
-  timer,
-} from "rxjs";
+import { combineLatest, map, Observable, Subject, switchMap, tap } from "rxjs";
 import { Reservation, Usage, VehicleMap } from "./interfaces";
 import { RestApiService } from "./services/rest-api.service";
-
-const TWO_HOURS = 2 * 60 * 60 * 1000;
-const ONE_MIN = 60 * 1000;
 
 @Component({
   selector: "app-root",
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.scss"],
 })
-export class AppComponent implements OnDestroy {
+export class AppComponent {
   title = "parking";
-
-  unsubscribe$ = new Subject<void>();
 
   currentReservations$: Subject<Reservation[]>;
   checkUsage$: Subject<Usage>;
-  activeSubscriptionsMap = new Map<string, Subscription>();
 
   vehicleMap: VehicleMap | undefined;
   vehicleMapKeys: string[] | undefined;
   vehicleFormControl: FormControl;
 
-  subscribeAfterUpdatingState = (obs$: Observable<unknown>): Subscription => {
+  subscribeAfterUpdatingState = (obs$: Observable<unknown>): void => {
     const getReservationsAndUsage$ = switchMap(() =>
       combineLatest([this.rest.getReservations(), this.rest.checkUsage()])
     );
@@ -47,15 +31,9 @@ export class AppComponent implements OnDestroy {
       }
     );
 
-    return obs$
-      .pipe(
-        getReservationsAndUsage$,
-        updateUsageAndReservations$,
-        takeUntil(this.unsubscribe$)
-      )
-      .subscribe({
-        error: console.error,
-      });
+    obs$.pipe(getReservationsAndUsage$, updateUsageAndReservations$).subscribe({
+      error: console.error,
+    });
   };
 
   constructor(private rest: RestApiService) {
@@ -88,29 +66,13 @@ export class AppComponent implements OnDestroy {
       return;
     }
 
-    const interval$ = timer(0, TWO_HOURS + ONE_MIN);
-    const makeReservation$ = interval$.pipe(
-      switchMap(() => this.rest.makeReservation(vehicle))
-    );
-
-    const sub = this.subscribeAfterUpdatingState(makeReservation$);
-
-    if (vehicle) {
-      this.activeSubscriptionsMap.set(vehicle.vehicle, sub);
-    }
+    this.subscribeAfterUpdatingState(this.rest.makeReservation(vehicle));
   }
 
-  cancel(event: MouseEvent, reservation: { id: string; key: string }): void {
+  cancel(event: MouseEvent, reservation: { id: string }): void {
     event.preventDefault();
 
     this.subscribeAfterUpdatingState(this.rest.cancelReservation(reservation));
-    const activeSubscription = this.activeSubscriptionsMap.get(reservation.key);
-    activeSubscription?.unsubscribe();
-  }
-
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
   }
 
   getEndsAt(endsAt: string): string {
@@ -121,6 +83,9 @@ export class AppComponent implements OnDestroy {
 
     const endAtDate = endDate.getDate();
     const endAtMonth = endDate.getMonth();
-    return `${endAtHours}:${endAtMins}${amOrPm} on ${endAtMonth}/${endAtDate}`;
+
+    return `${endAtHours === 0 ? `00` : endAtHours}:${
+      endAtMins < 10 ? `0${endAtMins}` : endAtMins
+    }${amOrPm} on ${endAtMonth}/${endAtDate}`;
   }
 }

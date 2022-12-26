@@ -72,7 +72,6 @@ export class RestApiService {
                   vehicle: string;
                   name: string;
                   id: string;
-                  key: string;
                   valid: {
                     min: { local: string };
                     max: { local: string };
